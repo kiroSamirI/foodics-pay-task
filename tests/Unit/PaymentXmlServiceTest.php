@@ -73,7 +73,7 @@ class PaymentXmlServiceTest extends TestCase
     {
         $data = array_merge($this->baseData, [
             'beneficiary_name' => 'John & Doe <test>',
-            'notes' => ['Note & 1', 'Note < 2']
+            'metadata' => ['Note & 1', 'Note < 2']
         ]);
         
         $xml = $this->service->generatePaymentXml($data);

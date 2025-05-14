@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Helpers\ArrayHelper;
 use DOMDocument;
 use DOMElement;
 
@@ -23,26 +24,26 @@ class PaymentXmlService
         $this->appendChildIfNotEmpty($doc, $transferInfo, 'Reference', $data['reference']);
         $this->appendChildIfNotEmpty($doc, $transferInfo, 'Date', $data['date']);
         $this->appendChildIfNotEmpty($doc, $transferInfo, 'Amount', $data['amount']);
-        $this->appendChildIfNotEmpty($doc, $transferInfo, 'Currency', $data['currency']);
+        $this->appendChildIfNotEmpty($doc, $transferInfo, 'Currency', $data['currency']?? "USD");
         $this->appendChildIfNotEmpty($doc, $transferInfo, 'Bank', $data['bank'] ?? null);
         $root->appendChild($transferInfo);
 
         // Sender Info
         $senderInfo = $doc->createElement('SenderInfo');
-        $this->appendChildIfNotEmpty($doc, $senderInfo, 'AccountNumber', $data['sender_account_number']);
+        $this->appendChildIfNotEmpty($doc, $senderInfo, 'AccountNumber', $data['sender_account_number'] ?? null);
         $root->appendChild($senderInfo);
 
         // Receiver Info
         $receiverInfo = $doc->createElement('ReceiverInfo');
-        $this->appendChildIfNotEmpty($doc, $receiverInfo, 'BankCode', $data['receiver_bank_code']);
-        $this->appendChildIfNotEmpty($doc, $receiverInfo, 'AccountNumber', $data['receiver_account_number']);
-        $this->appendChildIfNotEmpty($doc, $receiverInfo, 'BeneficiaryName', $data['beneficiary_name']);
+        $this->appendChildIfNotEmpty($doc, $receiverInfo, 'BankCode', $data['receiver_bank_code'] ?? null);
+        $this->appendChildIfNotEmpty($doc, $receiverInfo, 'AccountNumber', $data['receiver_account_number'] ?? null);
+        $this->appendChildIfNotEmpty($doc, $receiverInfo, 'BeneficiaryName', $data['beneficiary_name'] ?? null);
         $root->appendChild($receiverInfo);
 
         // Notes (only if present)
-        if (!empty($data['notes'])) {
+        if (!empty($data['metadata'])) {
             $notes = $doc->createElement('Notes');
-            foreach ($data['notes'] as $note) {
+            foreach ($data['metadata'] as $note) {
                 $this->appendChildIfNotEmpty($doc, $notes, 'Note', $note);
             }
             $root->appendChild($notes);

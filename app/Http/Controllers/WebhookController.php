@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Enums\Banks;
 use App\Jobs\ProcessTransactionJob;
+use App\Repositories\TransactionRepository;
+use App\Services\PaymentXmlService;
 use App\Services\WebhookEncryptionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -80,12 +82,4 @@ class WebhookController extends Controller
         }
     }
 
-    // public function receiveAcme(Request $request)
-    // {
-    //     $lines = explode("\n", $request->getContent());
-    //     foreach ($lines as $line) {
-    //         AcmeBankTransactionImporter::import($line);
-    //     }
-    //     return response()->json(['status' => 'ok']);
-    // }
 }

@@ -3,6 +3,7 @@ namespace App\Services\BankStrategy;
 
 use App\Models\Client;
 use App\Models\Transaction;
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use SimpleXMLElement;
 use Illuminate\Support\Facades\Log;
@@ -24,18 +25,19 @@ class AcmeTransactionService implements BankStrategyInterface
             Log::info('Processing Acme transaction', ['line' => $line]);
 
             // Parse the transaction line
-            if (!preg_match('/^(\d+(\,\d{2})?)\/{2}(\d+)\/{2}(\d{8})$/', $line, $matches)) {
+            if (!preg_match('/^(?P<amount>\d+(,\d{2})?)\/{2}(?P<reference>\d+)\/{2}(?P<date>\d{8})$/', $line, $matches)) {
                 Log::error('Invalid Acme transaction format', ['line' => $line]);
                 return false;
             }
 
-            $amount = str_replace(',', '.', $matches[1]);
-            $reference = $matches[3];
-            $date = $matches[4];
+            $amount = (float) str_replace(',', '.', $matches['amount']);
+            $reference = $matches['reference'];
+            $date = $matches['date'];
 
-            // Check for duplicate transaction
+            // Check for duplicate transaction with shared lock
             $exists = Transaction::where('reference', $reference)
                 ->where('client_id', $data['client_id'])
+                ->sharedLock()
                 ->exists();
 
             if ($exists) {
@@ -43,23 +45,35 @@ class AcmeTransactionService implements BankStrategyInterface
                 return false;
             }
 
-            // Create the transaction
-            $transaction = Transaction::create([
-                'reference' => $reference,
-                'date' => Carbon::createFromFormat('Ymd', $date)->toDateTimeString(),
-                'amount' => $amount,
-                'metadata' => [
-                    'bank' => 'acme'
-                ],
-                'client_id' => $data['client_id']
-            ]);
+            return DB::transaction(function () use ($amount, $reference, $date, $data) {
+                // Get the client with exclusive lock for update
+                $client = Client::where('id', $data['client_id'])
+                    ->lockForUpdate()
+                    ->firstOrFail();
 
-            Log::info('Transaction created successfully', [
-                'reference' => $reference,
-                'transaction_id' => $transaction->id
-            ]);
+                // Create the transaction
+                $transaction = Transaction::create([
+                    'reference' => $reference,
+                    'date' => Carbon::createFromFormat('Ymd', $date)->toDateTimeString(),
+                    'amount' => $amount,
+                    'metadata' => [
+                        'bank' => 'acme'
+                    ],
+                    'client_id' => $data['client_id']
+                ]);
+                
+                // Update client balance
+                $client->increment('balance', $amount);
 
-            return true;
+                Log::info('Transaction created successfully', [
+                    'reference' => $reference,
+                    'transaction_id' => $transaction->id,
+                    'client_id' => $client->id,
+                    'new_balance' => $client->balance
+                ]);
+
+                return true;
+            });
         } catch (\Exception $e) {
             Log::error('Error processing Acme transaction', [
                 'error' => $e->getMessage(),
@@ -113,13 +127,13 @@ class AcmeTransactionService implements BankStrategyInterface
 
     public function generateXml(string $line): string
     {
-        if (!preg_match('/^(\d+(\,\d{2})?)\/{2}(\d+)\/{2}(\d{8})$/', $line, $matches)) {
+        if (!preg_match('/^(?P<amount>\d+(,\d{2})?)\/{2}(?P<reference>\d+)\/{2}(?P<date>\d{8})$/', $line, $matches)) {
             throw new \InvalidArgumentException('Invalid Acme transaction format');
         }
 
-        $amount = str_replace(',', '.', $matches[1]);
-        $reference = $matches[3];
-        $date = $matches[4];
+        $amount = (float) str_replace(',', '.', $matches['amount']);
+        $reference = $matches['reference'];
+        $date = $matches['date'];
 
         $xml = new \SimpleXMLElement('<?xml version="1.0" encoding="UTF-8"?><transaction></transaction>');
         $xml->addChild('amount', $amount);

@@ -7,5 +7,5 @@ use Illuminate\Database\Eloquent\Model;
 class Client extends Model
 {
     use \Illuminate\Database\Eloquent\Factories\HasFactory;
-    protected $fillable = ['name'];
+    protected $fillable = ['name', 'balance'];
 }

@@ -13,9 +13,6 @@
             <directory>tests/Feature</directory>
             <directory>tests/Http</directory>
         </testsuite>
-        <testsuite name="Performance">
-            <directory>tests/Performance</directory>
-        </testsuite>
     </testsuites>
     <source>
         <include>

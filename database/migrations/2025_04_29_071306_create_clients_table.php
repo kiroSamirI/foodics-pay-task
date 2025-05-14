@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('clients', function (Blueprint $table) {
             $table->id();
             $table->string('name');
+            $table->decimal('balance', 10, 2)->default(0.00);
             $table->timestamps();
         });
     }
