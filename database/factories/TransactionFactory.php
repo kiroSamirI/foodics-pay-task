@@ -5,6 +5,7 @@ namespace Database\Factories;
 use App\Models\Transaction;
 use App\Models\Client;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use App\Enums\TransactionType;
 
 class TransactionFactory extends Factory
 {
@@ -21,7 +22,8 @@ class TransactionFactory extends Factory
                 'ip' => $this->faker->ipv4,
                 'user_agent' => $this->faker->userAgent
             ],
-            'client_id' => Client::factory()
+            'client_id' => Client::factory(),
+            'type' => $this->faker->randomElement([TransactionType::DEBIT, TransactionType::CREDIT]),
         ];
     }
 } 

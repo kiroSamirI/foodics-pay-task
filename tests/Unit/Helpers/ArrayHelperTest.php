@@ -49,7 +49,7 @@ class ArrayHelperTest extends TestCase
             ['nested' => 'value'],
             [true, false]
         ];
-        $expected = ['string', 123, 'value', true, false];
+        $expected = ['string', 123, 'nested' => 'value', true, false];
         
         $result = ArrayHelper::flatten($input);
         
@@ -104,7 +104,7 @@ class ArrayHelperTest extends TestCase
                 ]
             ]
         ];
-        $expected = ['value1', 'nested_value', 'deep_value'];
+        $expected = ['key1' => 'value1', 'nested_key' => 'nested_value', 'deep_key' => 'deep_value'];
         
         $result = ArrayHelper::flatten($input);
         

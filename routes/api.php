@@ -6,3 +6,4 @@ use Illuminate\Support\Facades\Route;
 
 Route::post('/webhooks', [WebhookController::class, 'receive']);
 Route::get('/transactions/{id}', [TransactionController::class, 'show']);
+Route::post('/transactions/xml', [TransactionController::class, 'sendXml']);

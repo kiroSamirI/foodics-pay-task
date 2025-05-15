@@ -14,7 +14,10 @@ class Transaction extends Model
         'date',
         'amount',
         'metadata',
-        'client_id'
+        'client_id',
+        'type',
+        'from',
+        'to'
     ];
 
     protected $casts = [

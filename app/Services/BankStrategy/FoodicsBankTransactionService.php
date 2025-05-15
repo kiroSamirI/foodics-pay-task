@@ -66,6 +66,7 @@ class FoodicsBankTransactionService implements BankStrategyInterface
                     'reference' => $reference,
                     'date' => Carbon::createFromFormat('Ymd', $date)->toDateTimeString(),
                     'amount' => $amount,
+                    'type' => 'credit',
                     'metadata' => [
                         'note' => $note,
                         'type' => $type,

@@ -16,6 +16,9 @@ return new class extends Migration
             $table->string('reference')->unique();
             $table->dateTime('date');
             $table->decimal('amount', 10, 2);
+            $table->string('type');
+            $table->string('from')->nullable();
+            $table->string('to')->nullable();
             $table->json('metadata')->nullable();
             $table->foreignId('client_id')->constrained()->onDelete('cascade');
             $table->timestamps();

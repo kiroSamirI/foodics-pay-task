@@ -26,7 +26,8 @@ class TransactionTest extends TestCase
             'date' => '2024-05-08 12:00:00',
             'amount' => '1234.56',
             'metadata' => ['key' => 'value', 'nested' => ['data' => 123]],
-            'client_id' => null
+            'client_id' => null,
+            'type' => 'debit',
         ];
 
         // Create a client for relationship tests
@@ -40,7 +41,10 @@ class TransactionTest extends TestCase
             'date',
             'amount',
             'metadata',
-            'client_id'
+            'client_id',
+            'type',
+            'from',
+            'to'
         ];
         $this->assertEquals($expectedFillable, $this->transaction->getFillable());
     }
@@ -90,7 +94,10 @@ class TransactionTest extends TestCase
 
     private function createTransactionWithClient(): Transaction
     {
-        $data = array_merge($this->testData, ['client_id' => $this->client->id]);
+        $data = array_merge($this->testData, [
+            'client_id' => $this->client->id,
+            'type' => 'debit',
+        ]);
         return Transaction::factory()->create($data);
     }
 } 
